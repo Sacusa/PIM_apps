@@ -1,0 +1,9 @@
+if [ "$#" -ne 1  ]; then
+    echo "Usage: $0 <binary>"
+    exit -1
+fi
+
+BIN=$1
+
+./bin/${BIN} -o -i ../../data/kmeans/204800.txt
+./clean.sh
