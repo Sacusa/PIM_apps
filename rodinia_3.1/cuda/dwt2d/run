@@ -1,0 +1,10 @@
+if [ "$#" -ne 1  ]; then
+    echo "Usage: $0 <binary>"
+    exit -1
+fi
+
+BIN=$1
+
+./bin/${BIN} 192.bmp -d 192x192 -f -5 -l 3
+#./bin/${BIN} rgb.bmp -d 1024x1024 -f -5 -l 3
+./clean.sh
