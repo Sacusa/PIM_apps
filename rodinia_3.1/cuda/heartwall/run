@@ -1,0 +1,9 @@
+if [ "$#" -ne 1  ]; then
+    echo "Usage: $0 <binary>"
+    exit -1
+fi
+
+BIN=$1
+
+./bin/${BIN} ../../data/heartwall/test.avi 20
+./clean.sh
