@@ -57,9 +57,8 @@ extern "C" void launch_pim(pim_state_t *pim_state, cudaStream_t stream)
     cudaError_t err = cudaSuccess;
     const float scalar = 0.5;
 
-    int threadsPerBlock = 512;
-    int blocksPerGrid = ((NUM_CHIPS * NUM_WARPS_PER_CHIP * \
-                          NUM_THREADS_PER_WARP) + threadsPerBlock - 1) / \
+    int threadsPerBlock = NUM_CHIPS;
+    int blocksPerGrid = (NUM_CHIPS + threadsPerBlock - 1) / \
                         threadsPerBlock;
     printf("CUDA kernel launch with %d blocks of %d threads\n", blocksPerGrid,
          threadsPerBlock);
@@ -85,6 +84,8 @@ extern "C" void launch_pim(pim_state_t *pim_state, cudaStream_t stream)
             triad<<<blocksPerGrid, threadsPerBlock, 0, stream>>>(
                     pim_state->rows, scalar, pim_state->num_rows);
             break;
+        case NOP:
+            break;
     }
 
     err = cudaGetLastError();
@@ -99,11 +100,13 @@ extern "C" void free_pim(pim_state_t *pim_state)
 {
     cudaError_t err = cudaSuccess;
 
-    err = cudaFree(pim_state->rows);
-    if (err != cudaSuccess) {
-        printf("Failed to free device memory (error code: %s)\n",
-                cudaGetErrorString(err));
-        exit(EXIT_FAILURE);
+    if (pim_state->kernel != NOP) {
+        err = cudaFree(pim_state->rows);
+        if (err != cudaSuccess) {
+            printf("Failed to free device memory (error code: %s)\n",
+                    cudaGetErrorString(err));
+            exit(EXIT_FAILURE);
+        }
     }
 
     free(pim_state);

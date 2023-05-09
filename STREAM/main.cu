@@ -16,7 +16,10 @@ int main(int argc, char *argv[]) {
 
     pim_kernel_t pim_kernel;
 
-    if (strcmp(kernel_name, "stream_add") == 0) {
+    if (strcmp(kernel_name, "nop") == 0) {
+        pim_kernel = NOP;
+    }
+    else if (strcmp(kernel_name, "stream_add") == 0) {
         pim_kernel = STREAM_ADD;
     }
     else if (strcmp(kernel_name, "stream_copy") == 0) {
@@ -30,6 +33,10 @@ int main(int argc, char *argv[]) {
     }
     else if (strcmp(kernel_name, "stream_triad") == 0) {
         pim_kernel = STREAM_TRIAD;
+    }
+    else {
+        printf("Invalid PIM kernel name: %s\n", kernel_name);
+        return EXIT_FAILURE;
     }
 
     cudaStream_t stream;

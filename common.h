@@ -38,6 +38,7 @@ struct row_t {
 typedef struct row_t row_t;
 
 enum pim_kernel_t {
+    NOP,    // This allows template code to just not launch a kernel
     STREAM_ADD,
     STREAM_COPY,
     STREAM_DAXPY,
