@@ -25,12 +25,11 @@
 
 #define ROW_SIZE 2048  // in bytes
 
-#define NUM_THREADS_PER_WARP 32
-#define NUM_WARPS_PER_CHIP   1
+#define ROW_OFFSET (1ULL<<20)
 
 #define NUM_PIM_UNITS (NUM_BANKS/2)
-
-#define ROW_OFFSET (1ULL<<20)
+#define PIM_RF_SIZE 1   // PIM register size in number of cols
+                        // Column size is 32 bytes
 
 struct row_t {
     uint8_t val[ROW_OFFSET];
