@@ -19,6 +19,6 @@ make
 mkdir -p bin
 
 for kernel in "${kernels[@]}"; do
-    #rm ${kernel}.cu
+    rm ${kernel}.cu
     mv ${kernel} bin/${kernel}_${pim_kernel}_${num_rows}
 done

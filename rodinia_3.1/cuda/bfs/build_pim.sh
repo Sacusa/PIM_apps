@@ -12,7 +12,7 @@ cp bfs_cu.template bfs.cu
 sed -i 's/PIM_KERNEL_INSTANTIATION/pim_state_t *pim_state = init_pim('"${kernel_name}"', 1048576, '"${num_rows}"');/g' bfs.cu
 
 make
-#rm bfs.cu
+rm bfs.cu
 
 mkdir -p bin
 mv bfs bin/bfs_${kernel_name}_${num_rows}
