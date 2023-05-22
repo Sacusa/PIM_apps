@@ -15,4 +15,4 @@ make
 rm opt1.cu
 
 mkdir -p bin
-mv 3D bin/3D_${kernel_name}_${num_rows}
+mv 3D bin/hotspot3D_${kernel_name}_${num_rows}
