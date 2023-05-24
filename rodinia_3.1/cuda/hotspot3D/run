@@ -5,6 +5,6 @@ fi
 
 BIN=$1
 
-./bin/${BIN} 512 8 100 ../../data/hotspot3D/power_512x8 ../../data/hotspot3D/temp_512x8 output.out
+./bin/${BIN} 512 8 20 ../../data/hotspot3D/power_512x8 ../../data/hotspot3D/temp_512x8 output.out
 #./bin/${BIN} 512 8 1 ../../data/hotspot3D/power_512x8 ../../data/hotspot3D/temp_512x8 output.out
 ./clean.sh

@@ -261,7 +261,7 @@ MAT **MGVF(MAT **IE, double vx, double vy, int Nc, cudaStream_t stream) {
 	// Smallest positive value expressable in double-precision
 	double eps = pow(2.0, -52.0);
 	// Maximum number of iterations to compute the MGVF matrix
-	int iterations = 500;
+	int iterations = 20;
 
 	// Allocate memory for pointers to the MGVF for each cell
 	MAT **IMGVF = (MAT **) malloc(sizeof(MAT *) * Nc);

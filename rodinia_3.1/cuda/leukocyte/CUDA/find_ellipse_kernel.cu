@@ -4,7 +4,7 @@
 
 
 // The number of sample points in each ellipse (stencil)
-#define NPOINTS 150
+#define NPOINTS 200
 // The maximum radius of a sample ellipse
 #define MAX_RAD 20
 // The total number of sample ellipses

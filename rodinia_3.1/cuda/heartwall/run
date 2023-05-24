@@ -5,5 +5,5 @@ fi
 
 BIN=$1
 
-./bin/${BIN} ../../data/heartwall/test.avi 20
+./bin/${BIN} ../../data/heartwall/test.avi 2
 ./clean.sh

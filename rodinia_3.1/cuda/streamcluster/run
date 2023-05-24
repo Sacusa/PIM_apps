@@ -5,5 +5,5 @@ fi
 
 BIN=$1
 
-./bin/${BIN} 10 20 256 65536 65536 1000 none output.txt 1
+./bin/${BIN} 10 20 32 1024 1024 100 none output.txt 1
 ./clean.sh

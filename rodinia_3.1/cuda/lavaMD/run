@@ -5,6 +5,6 @@ fi
 
 BIN=$1
 
-./bin/${BIN} -boxes1d 10
+./bin/${BIN} -boxes1d 3
 #./bin/${BIN} -boxes1d 1
 ./clean.sh
