@@ -4,13 +4,16 @@
 #include <cuda_runtime.h>
 #include <stdint.h>
 
-/* Address mapping for QV100 from GPGPU-Sim:
- * addr_dec_mask[CHIP]  = 0000000000001f00
- * addr_dec_mask[BK]    = 00000000000e2000
- * addr_dec_mask[ROW]   = 00000001fff00000
- * addr_dec_mask[COL]   = 000000000001c0e0
- * addr_dec_mask[BURST] = 000000000000001f
- */
+/**********************
+ * DRAM configuration *
+ **********************/
+
+// Address mapping for QV100 from GPGPU-Sim:
+// addr_dec_mask[CHIP]  = 0000000000001f00
+// addr_dec_mask[BK]    = 00000000000e2000
+// addr_dec_mask[ROW]   = 00000001fff00000
+// addr_dec_mask[COL]   = 000000000001c0e0
+// addr_dec_mask[BURST] = 000000000000001f
 
 #define NUM_CHIPS 32
 #define NUM_BANKS 16
@@ -24,17 +27,20 @@
                               (((col) & 0x7) << 5))
 
 #define ROW_SIZE 2048  // in bytes
-
 #define ROW_OFFSET (1ULL<<20)
-
-#define NUM_PIM_UNITS (NUM_BANKS/2)
-#define PIM_RF_SIZE 1   // PIM register size in number of cols
-                        // Column size is 32 bytes
 
 struct row_t {
     uint8_t val[ROW_OFFSET];
 };
 typedef struct row_t row_t;
+
+/*********************
+ * PIM configuration *
+ *********************/
+
+#define NUM_PIM_UNITS (NUM_BANKS/2)
+#define PIM_RF_SIZE 8  // PIM register size in number of cols
+                       // Column size is 32 bytes
 
 enum pim_kernel_t {
     NOP,    // This allows template code to just not launch a kernel
@@ -52,6 +58,16 @@ struct pim_state_t {
     int num_rows;
 };
 typedef struct pim_state_t pim_state_t;
+
+/****************************
+ * GPU shader configuration *
+ ****************************/
+
+#define NUM_THREADS_PER_WARP 32
+
+/*************************
+ * Function declarations *
+ *************************/
 
 #ifdef __cplusplus
 extern "C" pim_state_t *init_pim(pim_kernel_t, int, int);

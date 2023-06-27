@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <stdio.h>
 #include <string.h>
 #include "common.h"
@@ -57,8 +58,9 @@ extern "C" void launch_pim(pim_state_t *pim_state, cudaStream_t stream)
     cudaError_t err = cudaSuccess;
     const float scalar = 0.5;
 
-    int threadsPerBlock = NUM_CHIPS;
-    int blocksPerGrid = (NUM_CHIPS + threadsPerBlock - 1) / \
+    int numThreads = NUM_CHIPS * 32;
+    int threadsPerBlock = std::max(numThreads / PIM_RF_SIZE, 64);
+    int blocksPerGrid = (numThreads + threadsPerBlock - 1) / \
                         threadsPerBlock;
     printf("CUDA kernel launch with %d blocks of %d threads\n", blocksPerGrid,
          threadsPerBlock);

@@ -2,5 +2,6 @@
 **/*.out
 **/bin
 STREAM/main
+STREAM/output
 rodinia_3.1/cuda/leukocyte/meschach_lib/meschach.a
 rodinia_3.1/cuda/nn/hurricane_gen
