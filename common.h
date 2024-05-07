@@ -27,6 +27,7 @@
                               (((col) & 0x7) << 5))
 
 #define ROW_SIZE 2048  // in bytes
+#define COL_SIZE 32    // in bytes
 #define ROW_OFFSET (1ULL<<20)
 
 struct row_t {
@@ -48,7 +49,13 @@ enum pim_kernel_t {
     STREAM_COPY,
     STREAM_DAXPY,
     STREAM_SCALE,
-    STREAM_TRIAD
+    STREAM_TRIAD,
+    BN_FWD,
+    BN_BWD,
+    KMEANS,
+    HISTOGRAM,
+    FULLY_CONNECTED,
+    GRIM
 };
 typedef enum pim_kernel_t pim_kernel_t;
 
@@ -56,6 +63,16 @@ struct pim_state_t {
     pim_kernel_t kernel;
     row_t *rows;
     int num_rows;
+
+    // array of pointers for additional arguments
+    void **args;
+    int num_args;
+
+    // Kmeans arguments
+    // Other benchmarks reuse them too
+    int num_datapoints;
+    int num_features;
+    int num_iters;
 };
 typedef struct pim_state_t pim_state_t;
 

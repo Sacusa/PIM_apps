@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "../common.h"
+#include "pim_real.h"
 #include "pim_stream.h"
 
 int main(int argc, char *argv[]) {
@@ -33,6 +34,24 @@ int main(int argc, char *argv[]) {
     }
     else if (strcmp(kernel_name, "stream_triad") == 0) {
         pim_kernel = STREAM_TRIAD;
+    }
+    else if (strcmp(kernel_name, "bn_fwd") == 0) {
+        pim_kernel = BN_FWD;
+    }
+    else if (strcmp(kernel_name, "bn_bwd") == 0) {
+        pim_kernel = BN_BWD;
+    }
+    else if (strcmp(kernel_name, "kmeans") == 0) {
+        pim_kernel = KMEANS;
+    }
+    else if (strcmp(kernel_name, "histogram") == 0) {
+        pim_kernel = HISTOGRAM;
+    }
+    else if (strcmp(kernel_name, "fc") == 0) {
+        pim_kernel = FULLY_CONNECTED;
+    }
+    else if (strcmp(kernel_name, "grim") == 0) {
+        pim_kernel = GRIM;
     }
     else {
         printf("Invalid PIM kernel name: %s\n", kernel_name);
