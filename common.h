@@ -40,8 +40,8 @@ typedef struct row_t row_t;
  *********************/
 
 #define NUM_PIM_UNITS (NUM_BANKS/2)
-#define PIM_RF_SIZE 8  // PIM register size in number of cols
-                       // Column size is 32 bytes
+#define PIM_GRF_SIZE 8  // PIM GRF size in number of cols
+#define PIM_SRF_SIZE 1  // PIM SRF size in number of cols
 
 enum pim_kernel_t {
     NOP,    // This allows template code to just not launch a kernel
@@ -55,7 +55,9 @@ enum pim_kernel_t {
     KMEANS,
     HISTOGRAM,
     FULLY_CONNECTED,
-    GRIM
+    FULLY_CONNECTED_128_ELEM,
+    GRIM,
+    SOFTMAX
 };
 typedef enum pim_kernel_t pim_kernel_t;
 

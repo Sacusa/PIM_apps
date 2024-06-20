@@ -122,34 +122,31 @@ extern "C" pim_state_t *init_pim(pim_kernel_t pim_kernel, int array_length,
         }
 
         case KMEANS: {
-            row_t *temp;
-            int *cluster_assignment, *cluster_size;
-            float *centroids;
+            row_t *temp, *centroids;
+            int *cluster_assignment;
 
             pim_state->num_datapoints = array_size;
-            pim_state->num_features = 34;
+            pim_state->num_features = 32;
             pim_state->num_iters = 1;
 
             checkCudaError(cudaMalloc((void **)&pim_state->rows,
                         sizeof(row_t) * num_rows * pim_state->num_features));
-            checkCudaError(cudaMalloc((void **)&cluster_assignment,
-                        KMEANS_NUM_CLUSTERS * sizeof(int)));
-            checkCudaError(cudaMalloc((void **)&cluster_size,
-                        KMEANS_NUM_CLUSTERS * sizeof(int)));
-            checkCudaError(cudaMalloc((void **)&centroids,
-                        KMEANS_NUM_CLUSTERS * pim_state->num_features * \
-                        sizeof(float)));
             checkCudaError(cudaMalloc((void **)&temp,
                         sizeof(row_t) * KMEANS_NUM_CLUSTERS * \
                         pim_state->num_features));
+            checkCudaError(cudaMalloc((void **)&centroids,
+                        (((KMEANS_NUM_CLUSTERS * pim_state->num_features * \
+                        sizeof(float)) + ROW_SIZE) / ROW_SIZE) * \
+                        sizeof(row_t)));
+            checkCudaError(cudaMalloc((void **)&cluster_assignment,
+                        KMEANS_NUM_CLUSTERS * sizeof(int)));
 
-            pim_state->num_args = 4;
+            pim_state->num_args = 3;
             pim_state->args = (void**) malloc(pim_state->num_args * \
                     sizeof(void*));
             pim_state->args[0] = cluster_assignment;
             pim_state->args[1] = centroids;
-            pim_state->args[2] = cluster_size;
-            pim_state->args[3] = temp;
+            pim_state->args[2] = temp;
             break;
         }
 
@@ -177,36 +174,33 @@ extern "C" pim_state_t *init_pim(pim_kernel_t pim_kernel, int array_length,
             break;
         }
 
-        case FULLY_CONNECTED: {
-            //int num_inputs = 1024;
-            //int num_outputs = 1024;
-            int num_inputs = 16;
-            int num_outputs = 16;
-            pim_state->num_rows = num_rows * num_inputs;
-
-            row_t *weights;
+        case FULLY_CONNECTED:
+        case FULLY_CONNECTED_128_ELEM: {
+            row_t *input;
             row_t *output;
-
-            pim_state->num_datapoints = num_inputs;
-            pim_state->num_features = num_outputs;
 
             checkCudaError(cudaMalloc((void **)&pim_state->rows,
                         pim_state->num_rows * sizeof(row_t)));
-            checkCudaError(cudaMalloc((void **)&weights,
-                        num_rows * num_outputs * sizeof(row_t)));
-            checkCudaError(cudaMalloc((void **)&output,
-                        num_rows * num_outputs * sizeof(row_t)));
+            checkCudaError(cudaMalloc((void **)&input, sizeof(row_t)));
+            checkCudaError(cudaMalloc((void **)&output, sizeof(row_t)));
 
             pim_state->num_args = 2;
             pim_state->args = (void**) malloc(pim_state->num_args * \
                     sizeof(void*));
-            pim_state->args[0] = weights;
+            pim_state->args[0] = input;
             pim_state->args[1] = output;
             break;
         }
 
         case GRIM: {
             pim_state->num_rows++;  // result row
+            checkCudaError(cudaMalloc((void **)&pim_state->rows,
+                        sizeof(row_t) * pim_state->num_rows));
+            pim_state->num_args = 0;
+            break;
+        }
+
+        case SOFTMAX: {
             checkCudaError(cudaMalloc((void **)&pim_state->rows,
                         sizeof(row_t) * pim_state->num_rows));
             pim_state->num_args = 0;
@@ -222,7 +216,7 @@ extern "C" void launch_pim(pim_state_t *pim_state, cudaStream_t stream)
     const float scalar = 0.5;
 
     int numThreads = NUM_CHIPS * 32;
-    int threadsPerBlock = std::max(numThreads / PIM_RF_SIZE, 64);
+    int threadsPerBlock = std::max(numThreads / PIM_GRF_SIZE, 64);
     int blocksPerGrid = (numThreads + threadsPerBlock - 1) / \
                         threadsPerBlock;
     printf("CUDA kernel launch with %d blocks of %d threads\n", blocksPerGrid,
@@ -267,10 +261,10 @@ extern "C" void launch_pim(pim_state_t *pim_state, cudaStream_t stream)
         case KMEANS:
             kmeans<<<blocksPerGrid, threadsPerBlock, 0, stream>>>(
                     pim_state->rows, pim_state->num_rows,
-                    (int*) pim_state->args[0], (float*) pim_state->args[1],
-                    (int*) pim_state->args[2], pim_state->num_datapoints,
-                    pim_state->num_features, pim_state->num_iters,
-                    numThreads, (row_t*) pim_state->args[3]);
+                    (row_t*) pim_state->args[1], (int*) pim_state->args[0],
+                    pim_state->num_datapoints, pim_state->num_features,
+                    pim_state->num_iters, numThreads,
+                    (row_t*) pim_state->args[2]);
             break;
         case HISTOGRAM:
             histogram<<<blocksPerGrid, threadsPerBlock, 0, stream>>>(
@@ -280,12 +274,21 @@ extern "C" void launch_pim(pim_state_t *pim_state, cudaStream_t stream)
             break;
         case FULLY_CONNECTED:
             fully_connected<<<blocksPerGrid, threadsPerBlock, 0, stream>>>(
-                    pim_state->rows, (row_t*) pim_state->args[0],
+                    (row_t*) pim_state->args[0], pim_state->rows,
                     (row_t*) pim_state->args[1], pim_state->num_rows,
-                    pim_state->num_datapoints, pim_state->num_features);
+                    NUM_COLS);
+            break;
+        case FULLY_CONNECTED_128_ELEM:
+            fully_connected<<<blocksPerGrid, threadsPerBlock, 0, stream>>>(
+                    (row_t*) pim_state->args[0], pim_state->rows,
+                    (row_t*) pim_state->args[1], pim_state->num_rows, 8);
             break;
         case GRIM:
             grim<<<blocksPerGrid, threadsPerBlock, 0, stream>>>(
+                    pim_state->rows, pim_state->num_rows);
+            break;
+        case SOFTMAX:
+            softmax<<<blocksPerGrid, threadsPerBlock, 0, stream>>>(
                     pim_state->rows, pim_state->num_rows);
             break;
         case NOP:

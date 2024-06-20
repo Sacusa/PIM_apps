@@ -1,6 +1,6 @@
 declare -a apps_256=("stream_add" "stream_copy" "stream_daxpy" "stream_scale"
-    "stream_triad" "bn_fwd" "bn_bwd")
-declare -a apps_1=("kmeans" "histogram" "fc")
+    "stream_triad" "bn_fwd" "bn_bwd" "fc")
+declare -a apps_1=("kmeans" "histogram")
 
 if [ "$#" -ne 1 ]; then
     echo "Usage: $0 <PIM RF size>"

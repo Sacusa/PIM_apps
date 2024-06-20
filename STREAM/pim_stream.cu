@@ -20,10 +20,10 @@ __global__ void add(row_t *mem_rows, int num_rows) {
     for (int row_A = 0; row_A < num_rows; row_A++) {
         int row_B = row_A + num_rows;
         int row_C = row_B + num_rows;
-        for (int col = 0; col < NUM_COLS; col += PIM_RF_SIZE) {
+        for (int col = 0; col < NUM_COLS; col += PIM_GRF_SIZE) {
 
             // reg = a[i]
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -36,7 +36,7 @@ __global__ void add(row_t *mem_rows, int num_rows) {
             __threadfence();
 
             // reg = reg + b[i]
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -49,7 +49,7 @@ __global__ void add(row_t *mem_rows, int num_rows) {
             __threadfence();
 
             // c[i] = reg
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -82,10 +82,10 @@ __global__ void copy(row_t *mem_rows, int num_rows) {
 
     for (int row_A = 0; row_A < num_rows; row_A++) {
         int row_B = row_A + num_rows;
-        for (int col = 0; col < NUM_COLS; col += PIM_RF_SIZE) {
+        for (int col = 0; col < NUM_COLS; col += PIM_GRF_SIZE) {
 
             // reg = a[i]
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -98,7 +98,7 @@ __global__ void copy(row_t *mem_rows, int num_rows) {
             __threadfence();
 
             // b[i] = reg
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -130,10 +130,10 @@ __global__ void daxpy(row_t *mem_rows, float scalar, int num_rows) {
 
     for (int row_A = 0; row_A < num_rows; row_A++) {
         int row_B = row_A + num_rows;
-        for (int col = 0; col < NUM_COLS; col += PIM_RF_SIZE) {
+        for (int col = 0; col < NUM_COLS; col += PIM_GRF_SIZE) {
 
             // reg = scalar * a[i]
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -146,7 +146,7 @@ __global__ void daxpy(row_t *mem_rows, float scalar, int num_rows) {
             __threadfence();
 
             // reg = reg + b[i]
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -159,7 +159,7 @@ __global__ void daxpy(row_t *mem_rows, float scalar, int num_rows) {
             __threadfence();
 
             // b[i] = reg
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -190,10 +190,10 @@ __global__ void scale(row_t *mem_rows, float scalar, int num_rows) {
     uint16_t store = 100;
 
     for (int row = 0; row < num_rows; row++) {
-        for (int col = 0; col < NUM_COLS; col += PIM_RF_SIZE) {
+        for (int col = 0; col < NUM_COLS; col += PIM_GRF_SIZE) {
 
             // reg = scalar * a[i]
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -206,7 +206,7 @@ __global__ void scale(row_t *mem_rows, float scalar, int num_rows) {
             __threadfence();
 
             // a[i] = reg
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -239,10 +239,10 @@ __global__ void triad(row_t *mem_rows, float scalar, int num_rows) {
     for (int row_A = 0; row_A < num_rows; row_A++) {
         int row_B = row_A + num_rows;
         int row_C = row_B + num_rows;
-        for (int col = 0; col < NUM_COLS; col += PIM_RF_SIZE) {
+        for (int col = 0; col < NUM_COLS; col += PIM_GRF_SIZE) {
 
             // reg = scalar * b[i]
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -255,7 +255,7 @@ __global__ void triad(row_t *mem_rows, float scalar, int num_rows) {
             __threadfence();
 
             // reg = a[i] + reg
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -268,7 +268,7 @@ __global__ void triad(row_t *mem_rows, float scalar, int num_rows) {
             __threadfence();
 
             // c[i] = reg
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 

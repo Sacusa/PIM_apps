@@ -15,8 +15,7 @@ __global__ void bn_bwd(float*, float*, float*, float*, float*, int, int,
         float*, float*, float*, float*, float*, float*, float*);
 __global__ void kmeans(float*, int*, float*, int*, int, int, int, int);
 __global__ void histogram(uint32_t*, int, uint32_t*, uint32_t*, int, int);
-__global__ void fully_connected(float*, float*, float*, float*, int, int, int,
-        int, int);
+__global__ void fully_connected(float*, float*, float*, int, int, int);
 __global__ void grim(uint32_t*, uint32_t, uint32_t*);
 
 #endif

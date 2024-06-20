@@ -163,7 +163,7 @@ int main(int argc, char *argv[]) {
 
     else if (strcmp(kernel_name, "kmeans") == 0) {
         int num_datapoints = array_length;
-        int num_features = 34;
+        int num_features = 32;
         int num_iters = 1;
         int num_threads = blocksPerGrid * THREADS_PER_BLOCK;
 
@@ -209,31 +209,23 @@ int main(int argc, char *argv[]) {
     }
 
     else if (strcmp(kernel_name, "fc") == 0) {
-        float *input, *weights, *bias, *output;
+        float *input, *weights, *output;
 
-        int batch_size = array_length;
-        //int num_inputs = 1024;
-        //int num_outputs = 1024;
-        int num_inputs = 16;
-        int num_outputs = 16;
+        int input_size = 256;
         int num_threads = blocksPerGrid * THREADS_PER_BLOCK;
 
         checkCudaError(cudaMalloc((void **)&input,
-                    batch_size * num_inputs * sizeof(float)));
+                    input_size * sizeof(float)));
         checkCudaError(cudaMalloc((void **)&weights,
-                    num_inputs * num_outputs * sizeof(float)));
-        checkCudaError(cudaMalloc((void **)&bias,
-                    num_outputs * sizeof(float)));
+                    array_length * input_size * sizeof(float)));
         checkCudaError(cudaMalloc((void **)&output,
-                    batch_size * num_outputs * sizeof(float)));
+                    array_length * sizeof(float)));
 
         fully_connected<<<blocksPerGrid, THREADS_PER_BLOCK>>>(input, weights,
-                bias, output, batch_size, num_inputs, num_outputs, num_threads,
-                blocksPerGrid);
+                output, input_size, array_length, num_threads);
 
         checkCudaError(cudaFree(input));
         checkCudaError(cudaFree(weights));
-        checkCudaError(cudaFree(bias));
         checkCudaError(cudaFree(output));
     }
 

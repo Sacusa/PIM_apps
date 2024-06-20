@@ -191,41 +191,19 @@ __global__ void histogram(uint32_t *input, int num_elements,
     }
 }
 
-// Terminology reference: https://docs.nvidia.com/deeplearning/performance/dl-performance-fully-connected/index.html
-__global__ void fully_connected(float *input, float *weights, float *bias,
-        float *output, int batch_size, int num_inputs, int num_outputs,
-        int num_threads, int num_blocks)
+__global__ void fully_connected(float *input, float *weights,
+        float *output, int input_size, int num_weights, int num_threads)
 {
     const int thread_id = blockDim.x * blockIdx.x + threadIdx.x;
 
-    __shared__ float partial_sum[THREADS_PER_BLOCK];
+    for (int i = thread_id; i < num_weights; i += num_threads) {
+        float sum = 0;
 
-    for (int out = 0; out < num_outputs; out++) {
-        float *weight_vector = &(weights[out * num_inputs]);
-
-        for (int batch = blockIdx.x; batch < batch_size; batch += num_blocks) {
-            float *batch_vector = &(input[batch * num_inputs]);
-
-            partial_sum[thread_id] = 0;
-
-            for (int i = thread_id; i < num_inputs; i += blockDim.x) {
-                partial_sum[thread_id] += batch_vector[i] * weight_vector[i];
-            }
-
-            __syncthreads();
-
-            int thread_factor = 2;
-            while (thread_factor <= THREADS_PER_BLOCK) {
-                if ((thread_id % thread_factor) == 0) {
-                    partial_sum[thread_id] += partial_sum[thread_id + \
-                                              (thread_factor / 2)];
-                }
-                thread_factor *= 2;
-                __syncthreads();
-            }
-
-            output[(batch * num_outputs) + out] = partial_sum[0] + bias[out];
+        for (int j = 0; j < input_size; j++) {
+            sum += input[j] * weights[(i * input_size) + j];
         }
+
+        output[i] = sum;
     }
 }
 

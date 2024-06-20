@@ -20,10 +20,10 @@ __global__ void bn_fwd(row_t *mem_rows, int num_rows, row_t *mean,
     uint16_t store = 100;
 
     // Compute invstd (temp[0])
-    for (int col = 0; col < NUM_COLS; col += PIM_RF_SIZE) {
+    for (int col = 0; col < NUM_COLS; col += PIM_GRF_SIZE) {
 
         // reg = var
-        for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+        for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                 i += threads_per_pim_grp) {
             uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -36,7 +36,7 @@ __global__ void bn_fwd(row_t *mem_rows, int num_rows, row_t *mean,
         __threadfence();
 
         // reg = reg + eps
-        for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+        for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                 i += threads_per_pim_grp) {
             uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -49,7 +49,7 @@ __global__ void bn_fwd(row_t *mem_rows, int num_rows, row_t *mean,
         __threadfence();
 
         // reg = sqrt(reg)
-        for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+        for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                 i += threads_per_pim_grp) {
             uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -62,7 +62,7 @@ __global__ void bn_fwd(row_t *mem_rows, int num_rows, row_t *mean,
         __threadfence();
 
         // reg = 1 / reg
-        for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+        for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                 i += threads_per_pim_grp) {
             uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -75,7 +75,7 @@ __global__ void bn_fwd(row_t *mem_rows, int num_rows, row_t *mean,
         __threadfence();
 
         // temp[0] = reg
-        for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+        for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                 i += threads_per_pim_grp) {
             uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -89,10 +89,10 @@ __global__ void bn_fwd(row_t *mem_rows, int num_rows, row_t *mean,
     }
 
     // Compute gamma (temp[1])
-    for (int col = 0; col < NUM_COLS; col += PIM_RF_SIZE) {
+    for (int col = 0; col < NUM_COLS; col += PIM_GRF_SIZE) {
 
         // reg = abs(weight)
-        for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+        for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                 i += threads_per_pim_grp) {
             uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -105,7 +105,7 @@ __global__ void bn_fwd(row_t *mem_rows, int num_rows, row_t *mean,
         __threadfence();
 
         // reg = reg + eps
-        for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+        for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                 i += threads_per_pim_grp) {
             uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -118,7 +118,7 @@ __global__ void bn_fwd(row_t *mem_rows, int num_rows, row_t *mean,
         __threadfence();
 
         // temp[1] = reg
-        for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+        for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                 i += threads_per_pim_grp) {
             uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -133,10 +133,10 @@ __global__ void bn_fwd(row_t *mem_rows, int num_rows, row_t *mean,
 
     for (int row_X = 0; row_X < num_rows; row_X++) {
         int row_z = row_X + num_rows;
-        for (int col = 0; col < NUM_COLS; col += PIM_RF_SIZE) {
+        for (int col = 0; col < NUM_COLS; col += PIM_GRF_SIZE) {
 
             // reg = a[i]
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -149,7 +149,7 @@ __global__ void bn_fwd(row_t *mem_rows, int num_rows, row_t *mean,
             __threadfence();
 
             // reg = reg - mean
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -162,7 +162,7 @@ __global__ void bn_fwd(row_t *mem_rows, int num_rows, row_t *mean,
             __threadfence();
 
             // reg = reg * invstd
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -175,7 +175,7 @@ __global__ void bn_fwd(row_t *mem_rows, int num_rows, row_t *mean,
             __threadfence();
 
             // reg = reg * gamma
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -188,7 +188,7 @@ __global__ void bn_fwd(row_t *mem_rows, int num_rows, row_t *mean,
             __threadfence();
 
             // reg = reg + beta
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -201,7 +201,7 @@ __global__ void bn_fwd(row_t *mem_rows, int num_rows, row_t *mean,
             __threadfence();
 
             // b[i] = reg
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -246,10 +246,10 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
     uint16_t store = 100;
 
     // Compute invstd (temp[0])
-    for (int col = 0; col < NUM_COLS; col += PIM_RF_SIZE) {
+    for (int col = 0; col < NUM_COLS; col += PIM_GRF_SIZE) {
 
         // reg = var
-        for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+        for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                 i += threads_per_pim_grp) {
             uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -262,7 +262,7 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
         __threadfence();
 
         // reg = reg + eps
-        for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+        for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                 i += threads_per_pim_grp) {
             uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -275,7 +275,7 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
         __threadfence();
 
         // reg = sqrt(reg)
-        for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+        for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                 i += threads_per_pim_grp) {
             uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -288,7 +288,7 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
         __threadfence();
 
         // reg = 1 / reg
-        for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+        for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                 i += threads_per_pim_grp) {
             uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -301,7 +301,7 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
         __threadfence();
 
         // temp[0] = reg
-        for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+        for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                 i += threads_per_pim_grp) {
             uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -315,10 +315,10 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
     }
 
     // Compute gamma (temp[1])
-    for (int col = 0; col < NUM_COLS; col += PIM_RF_SIZE) {
+    for (int col = 0; col < NUM_COLS; col += PIM_GRF_SIZE) {
 
         // reg = abs(weight)
-        for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+        for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                 i += threads_per_pim_grp) {
             uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -331,7 +331,7 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
         __threadfence();
 
         // reg = reg + eps
-        for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+        for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                 i += threads_per_pim_grp) {
             uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -344,7 +344,7 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
         __threadfence();
 
         // temp[1] = reg
-        for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+        for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                 i += threads_per_pim_grp) {
             uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -358,10 +358,10 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
     }
 
     // Compute mul (temp[2])
-    for (int col = 0; col < NUM_COLS; col += PIM_RF_SIZE) {
+    for (int col = 0; col < NUM_COLS; col += PIM_GRF_SIZE) {
 
         // reg = gamma
-        for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+        for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                 i += threads_per_pim_grp) {
             uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -374,7 +374,7 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
         __threadfence();
 
         // reg = reg * invstd
-        for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+        for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                 i += threads_per_pim_grp) {
             uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -387,7 +387,7 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
         __threadfence();
 
         // mul = reg
-        for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+        for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                 i += threads_per_pim_grp) {
             uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -407,10 +407,10 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
         int row_dw = row_w  + num_rows;
         int row_dx = row_dw + num_rows;
 
-        for (int col = 0; col < NUM_COLS; col += PIM_RF_SIZE) {
+        for (int col = 0; col < NUM_COLS; col += PIM_GRF_SIZE) {
 
             // reg = z[i]
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -423,7 +423,7 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
             __threadfence();
 
             // reg = reg - bias
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -436,7 +436,7 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
             __threadfence();
 
             // reg = reg / gamma
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -449,7 +449,7 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
             __threadfence();
 
             // temp[3] = reg
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -462,7 +462,7 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
             __threadfence();
 
             // reg = w[i]
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -475,7 +475,7 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
             __threadfence();
 
             // reg = reg * edz
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -488,7 +488,7 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
             __threadfence();
 
             // temp[4] = reg
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -501,7 +501,7 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
             __threadfence();
 
             // reg = w[i]
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -514,7 +514,7 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
             __threadfence();
 
             // reg = reg * temp[3]
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -527,7 +527,7 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
             __threadfence();
 
             // reg = reg * eydz
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -540,7 +540,7 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
             __threadfence();
 
             // temp[5] = reg
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -553,7 +553,7 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
             __threadfence();
 
             // reg = dz[i]
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -566,7 +566,7 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
             __threadfence();
 
             // reg = reg - temp[4]
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -579,7 +579,7 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
             __threadfence();
 
             // reg = reg - temp[5]
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -592,7 +592,7 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
             __threadfence();
 
             // reg = reg * temp[2]
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -605,7 +605,7 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
             __threadfence();
 
             // dx = reg
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -618,7 +618,7 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
             __threadfence();
 
             // reg = mean
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -631,7 +631,7 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
             __threadfence();
 
             // reg = reg * invstd (temp[0])
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -644,7 +644,7 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
             __threadfence();
 
             // reg = reg + y (temp[3])
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -657,7 +657,7 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
             __threadfence();
 
             // reg = reg * edz
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -670,7 +670,7 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
             __threadfence();
 
             // temp[4] = reg
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -683,7 +683,7 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
             __threadfence();
 
             // reg = y (temp[3])
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -696,7 +696,7 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
             __threadfence();
 
             // reg = reg * y (temp[3])
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -709,7 +709,7 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
             __threadfence();
 
             // reg = reg * 0.5
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -722,7 +722,7 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
             __threadfence();
 
             // reg = reg * eydz
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -735,7 +735,7 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
             __threadfence();
 
             // reg = reg + temp[4]
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -748,7 +748,7 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
             __threadfence();
 
             // reg = reg + mulW (gamma, temp[1])
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -761,7 +761,7 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
             __threadfence();
 
             // dw = reg
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -775,10 +775,10 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
         }
 
         // dw = -dw
-        for (int col = 0; col < NUM_COLS; col += PIM_RF_SIZE) {
+        for (int col = 0; col < NUM_COLS; col += PIM_GRF_SIZE) {
 
             // reg = dw
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -791,7 +791,7 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
             __threadfence();
 
             // reg = reg * -1
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -804,7 +804,7 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
             __threadfence();
 
             // mul = reg
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -821,10 +821,9 @@ __global__ void bn_bwd(row_t *mem_rows, int num_rows, row_t *mean,
 
 // The number of datapoints is a multiple of row size.
 // number of rows = number of points * number of features
-__global__ void kmeans(row_t *mem_rows, int num_rows,
-        int *cluster_assignment, float *centroids, int *cluster_size,
-        int num_datapoints, int num_features, int num_iters, int num_threads,
-        row_t *temp)
+__global__ void kmeans(row_t *mem_rows, int num_rows, row_t *centroids,
+        int *cluster_assignment, int num_datapoints, int num_features,
+        int num_iters, int num_threads, row_t *temp)
 {
     // This is the maximum number of threads that will issue requests for a
     // group of banks that map to a unique PIM unit
@@ -839,7 +838,8 @@ __global__ void kmeans(row_t *mem_rows, int num_rows,
                NUM_PIM_UNITS;
 
     int num_datapoint_rows = num_rows / num_features;
-    int num_datapoints_per_row = (ROW_SIZE * NUM_BANKS * NUM_CHIPS) / 4;
+    int cols_per_centroid = (num_features * sizeof(float)) / COL_SIZE;
+    int num_features_in_srf = (PIM_SRF_SIZE * COL_SIZE) / sizeof(float);
 
     float dummy = 100;
     uint16_t store = 100;
@@ -848,13 +848,35 @@ __global__ void kmeans(row_t *mem_rows, int num_rows,
 
         for (int c = 0; c < KMEANS_NUM_CLUSTERS; c++) {
             for (int row = 0; row < num_rows; row += num_features) {
+                int curr_centroid_col = c * cols_per_centroid;
                 int c_row = (c * num_datapoint_rows) + row;
 
                 for (int f = 0; f < num_features; f++) {
-                    for (int col = 0; col < NUM_COLS; col += PIM_RF_SIZE) {
+                    if ((f % num_features_in_srf) == 0) {
+                        // Load centroid into SRF
+                        for (int i = thread_id_in_grp; i < PIM_SRF_SIZE ;
+                                i += threads_per_pim_grp) {
+                            uint64_t mem_index = INDEX(chip, bank,
+                                    curr_centroid_col + i);
+
+                            asm volatile ("st.cs.global.f32 [%0], %1;"
+                                    : /* no outputs */
+                                    : "l"(&(centroids->val[mem_index])),
+                                      "f"(dummy)
+                                    : /* no clobbers */);
+                        }
+
+                        __threadfence();
+
+                        curr_centroid_col += PIM_SRF_SIZE;
+                    }
+
+                    __syncthreads();
+
+                    for (int col = 0; col < NUM_COLS; col += PIM_GRF_SIZE) {
 
                         // reg = datapoint[f] - centroid[f] (scalar memory)
-                        for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+                        for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                                 i += threads_per_pim_grp) {
                             uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -868,7 +890,7 @@ __global__ void kmeans(row_t *mem_rows, int num_rows,
                         __threadfence();
 
                         // reg = reg * reg
-                        for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+                        for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                                 i += threads_per_pim_grp) {
                             uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -882,7 +904,7 @@ __global__ void kmeans(row_t *mem_rows, int num_rows,
                         __threadfence();
 
                         // reg = reg + temp[c]
-                        for (int i = thread_id_in_grp; i < PIM_RF_SIZE ;
+                        for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                                 i += threads_per_pim_grp) {
                             uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -896,7 +918,7 @@ __global__ void kmeans(row_t *mem_rows, int num_rows,
                         __threadfence();
 
                         // temp[c] = reg
-                        for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+                        for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                                 i += threads_per_pim_grp) {
                             uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -912,9 +934,9 @@ __global__ void kmeans(row_t *mem_rows, int num_rows,
                 }
 
                 // temp[c] = sqrt(temp[c])
-                for (int col = 0; col < NUM_COLS; col += PIM_RF_SIZE) {
+                for (int col = 0; col < NUM_COLS; col += PIM_GRF_SIZE) {
                     // reg = sqrt(temp[c])
-                    for (int i = thread_id_in_grp; i < (PIM_RF_SIZE/2) ;
+                    for (int i = thread_id_in_grp; i < PIM_GRF_SIZE ;
                             i += threads_per_pim_grp) {
                         uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -928,7 +950,7 @@ __global__ void kmeans(row_t *mem_rows, int num_rows,
                     __threadfence();
 
                     // temp[c] = reg
-                    for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+                    for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                             i += threads_per_pim_grp) {
                         uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -945,75 +967,25 @@ __global__ void kmeans(row_t *mem_rows, int num_rows,
         }
 
         // Find closest centroid to each datapoint
-        for (int p = thread_id; p < num_datapoints; p += num_threads) {
-            float min_dist = INFINITY;
-            int closest_centroid = 0;
+        //for (int p = thread_id; p < num_datapoints; p += num_threads) {
+        //    float min_dist = INFINITY;
+        //    int closest_centroid = 0;
 
-            for(int c = 0; c < KMEANS_NUM_CLUSTERS; c++) {
-                int row = (c * num_datapoint_rows) + \
-                          (p / num_datapoints_per_row);
-                int index = (p % num_datapoints_per_row) * 4;
-                float dist = temp[row].val[index];
-
-                if (dist < min_dist) {
-                    min_dist = dist;
-                    closest_centroid = c;
-                }
-            }
-
-            //assign closest cluster id for this datapoint/thread
-            cluster_assignment[p] = closest_centroid;
-        }
-
-        //// Reset cluster sizes and centroids
-        //if (thread_id < KMEANS_NUM_CLUSTERS) {
-        //    cluster_size[thread_id] = 0;
-        //    for (int f = 0; f < num_features; f++) {
-        //        centroids[(thread_id * num_features) + f] = 0;
-        //    }
-        //}
-
-        //__syncthreads();
-
-        //// Compute cluster size
-        //float cluster_size_local[KMEANS_NUM_CLUSTERS] = {0};
-
-        //for (int p = threadIdx.x; p < num_datapoints; p += num_threads) {
-        //    cluster_size_local[cluster_assignment[p]]++;
-        //}
-
-        //for (int c = 0; c < KMEANS_NUM_CLUSTERS; c++) {
-        //    atomicAdd(&cluster_size[c], cluster_size_local[c]);
-        //}
-
-        //// Compute cluster datapoint sums
-        //for (int f = 0; f < num_features; f++) {
-        //    float cluster_datapoint_sums[KMEANS_NUM_CLUSTERS] = {0};
-
-        //    for (int p = threadIdx.x; p < num_datapoints; p += num_threads) {
-        //        int row = ((p / num_datapoints_per_row) * num_features) + f;
+        //    for(int c = 0; c < KMEANS_NUM_CLUSTERS; c++) {
+        //        int row = (c * num_datapoint_rows) + \
+        //                  (p / num_datapoints_per_row);
         //        int index = (p % num_datapoints_per_row) * 4;
-        //        cluster_datapoint_sums[cluster_assignment[p]] += \
-        //                mem_rows[row].val[index];
+        //        float dist = temp[row].val[index];
+
+        //        if (dist < min_dist) {
+        //            min_dist = dist;
+        //            closest_centroid = c;
+        //        }
         //    }
 
-        //    for (int c = 0; c < KMEANS_NUM_CLUSTERS; c++) {
-        //        atomicAdd(&centroids[(c * num_features) + f],
-        //                cluster_datapoint_sums[c]);
-        //    }
+        //    //assign closest cluster id for this datapoint/thread
+        //    cluster_assignment[p] = closest_centroid;
         //}
-
-        //__syncthreads();
-        //
-        //// Recompute centroids
-        //if (thread_id < KMEANS_NUM_CLUSTERS) {
-        //    for (int f = 0; f < num_features; f++) {
-        //        centroids[(thread_id * num_features) + f] /= \
-        //                cluster_size[thread_id];
-        //    }
-        //}
-
-        //__syncthreads();
     }
 }
 
@@ -1064,10 +1036,10 @@ __global__ void histogram(uint32_t *input, int num_elements, row_t *local_bins,
     for (int row = 0; row < result_row; row++) {
         for (int bin = 0; bin < ((NUM_COLS * COL_SIZE) / 4);
                 bin += HISTOGRAM_NUM_BINS) {
-            for (int col = 0; col < HISTOGRAM_NUM_BINS; col += PIM_RF_SIZE) {
+            for (int col = 0; col < HISTOGRAM_NUM_BINS; col += PIM_GRF_SIZE) {
 
                 // reg = local_bin
-                for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+                for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                         i += threads_per_pim_grp) {
                     uint64_t mem_index = INDEX(chip, bank, bin + col + i);
 
@@ -1081,7 +1053,7 @@ __global__ void histogram(uint32_t *input, int num_elements, row_t *local_bins,
                 __threadfence();
 
                 // reg = reg + bin_total
-                for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+                for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                         i += threads_per_pim_grp) {
                     uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -1095,7 +1067,7 @@ __global__ void histogram(uint32_t *input, int num_elements, row_t *local_bins,
                 __threadfence();
 
                 // bin_total = reg
-                for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+                for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                         i += threads_per_pim_grp) {
                     uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -1135,7 +1107,7 @@ __global__ void histogram(uint32_t *input, int num_elements, row_t *local_bins,
  * 2) row size = batch size
  */
 __global__ void fully_connected(row_t *input, row_t *weights, row_t *output,
-        int num_rows, int num_inputs, int num_outputs)
+        int num_weight_rows, int num_weight_cols)
 {
     // This is the maximum number of threads that will issue requests for a
     // group of banks that map to a unique PIM unit
@@ -1150,33 +1122,74 @@ __global__ void fully_connected(row_t *input, row_t *weights, row_t *output,
                NUM_PIM_UNITS;
 
     float dummy = 100;
-    uint16_t store = 100;
 
-    for (int out = 0; out < num_outputs; out++) {
-        for (int col = 0; col < NUM_COLS; col += (PIM_RF_SIZE / 2)) {
-            // reg[0] = weights
-            for (int i = thread_id_in_grp; i < (PIM_RF_SIZE / 2);
-                    i += threads_per_pim_grp) {
-                uint64_t mem_index = INDEX(chip, bank, col + i);
+    // The number of input vector elements that can be stored in the SRF at
+    // any time
+    int num_inputs_in_srf = (PIM_SRF_SIZE * COL_SIZE) / 4;
 
-                asm volatile ("st.cs.global.f32 [%0], %1;"
-                        : /* no outputs */
-                        : "l"(&(weights[out].val[mem_index])),
-                          "f"(dummy)
-                        : /* no clobbers */);
-            }
+    // Number of input vector elements, which is a function of how many
+    // input vector elements can be stored in the SRF and the number of
+    // elements
+    int num_input_blocks = num_weight_rows / num_inputs_in_srf;
 
-            __threadfence();
+    // Global weights row counter
+    int weight_row = 0;
 
-            for (int row = 0; row < num_rows; row++) {
-                // reg[1] = reg[1] + (a[i] * reg[0])
-                for (int i = thread_id_in_grp; i < (PIM_RF_SIZE / 2);
+    for (int input_block = 0; input_block < num_input_blocks;
+            input_block++) {
+        // Load the input vector into SRF
+        for (int i = thread_id_in_grp; i < PIM_SRF_SIZE;
+                i += threads_per_pim_grp) {
+            uint64_t mem_index = INDEX(chip, bank,
+                    (input_block * PIM_SRF_SIZE) + i);
+
+            asm volatile ("st.cs.global.f32 [%0], %1;"
+                    : /* no outputs */
+                    : "l"(&(input->val[mem_index])),
+                      "f"(dummy)
+                    : /* no clobbers */);
+        }
+
+        __threadfence();
+
+        for (int row = 0; row < num_inputs_in_srf; row++) {
+            for (int col = 0; col < num_weight_cols; col += PIM_GRF_SIZE) {
+                // reg = weights * input
+                for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                         i += threads_per_pim_grp) {
                     uint64_t mem_index = INDEX(chip, bank, col + i);
 
                     asm volatile ("st.cs.global.f32 [%0], %1;"
                             : /* no outputs */
-                            : "l"(&(input[row].val[mem_index])),
+                            : "l"(&(weights[weight_row].val[mem_index])),
+                              "f"(dummy)
+                            : /* no clobbers */);
+                }
+
+                __threadfence();
+
+                // reg += output
+                for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
+                        i += threads_per_pim_grp) {
+                    uint64_t mem_index = INDEX(chip, bank, col + i);
+
+                    asm volatile ("st.cs.global.f32 [%0], %1;"
+                            : /* no outputs */
+                            : "l"(&(output->val[mem_index])),
+                              "f"(dummy)
+                            : /* no clobbers */);
+                }
+
+                __threadfence();
+
+                // output = reg
+                for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
+                        i += threads_per_pim_grp) {
+                    uint64_t mem_index = INDEX(chip, bank, col + i);
+
+                    asm volatile ("st.cs.global.f32 [%0], %1;"
+                            : /* no outputs */
+                            : "l"(&(output->val[mem_index])),
                               "f"(dummy)
                             : /* no clobbers */);
                 }
@@ -1184,33 +1197,7 @@ __global__ void fully_connected(row_t *input, row_t *weights, row_t *output,
                 __threadfence();
             }
 
-            // reg[1] = reg[1] + bias (scalar)
-            for (int i = thread_id_in_grp; i < (PIM_RF_SIZE / 2);
-                    i += threads_per_pim_grp) {
-                uint64_t mem_index = INDEX(chip, bank, col + i);
-
-                asm volatile ("st.cs.global.f32 [%0], %1;"
-                        : /* no outputs */
-                        : "l"(&(output[out].val[mem_index])),
-                          "f"(dummy)
-                        : /* no clobbers */);
-            }
-
-            __threadfence();
-
-            // output[i] = reg[1]
-            for (int i = thread_id_in_grp; i < (PIM_RF_SIZE / 2);
-                    i += threads_per_pim_grp) {
-                uint64_t mem_index = INDEX(chip, bank, col + i);
-
-                asm volatile ("st.cs.global.u16 [%0], %1;"
-                        : /* no outputs */
-                        : "l"(&(output[out].val[mem_index])),
-                          "h"(store)
-                        : /* no clobbers */);
-            }
-
-            __threadfence();
+            weight_row++;
         }
     }
 }
@@ -1234,10 +1221,10 @@ __global__ void grim(row_t *mem_rows, int num_rows)
 
     int mask_row = num_rows - 1;
     for (int row = 0; row < mask_row; row++) {
-        for (int col = 0; col < NUM_COLS; col += PIM_RF_SIZE) {
+        for (int col = 0; col < NUM_COLS; col += PIM_GRF_SIZE) {
 
             // reg = GRIM(input[i])
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -1250,7 +1237,7 @@ __global__ void grim(row_t *mem_rows, int num_rows)
             __threadfence();
 
             // reg = result[i] OR mask
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
@@ -1261,13 +1248,125 @@ __global__ void grim(row_t *mem_rows, int num_rows)
             }
 
             // mask[i] = reg
-            for (int i = thread_id_in_grp; i < PIM_RF_SIZE;
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
                     i += threads_per_pim_grp) {
                 uint64_t mem_index = INDEX(chip, bank, col + i);
 
                 asm volatile ("st.cs.global.u16 [%0], %1;"
                         : /* no outputs */
                         : "l"(&(mem_rows[mask_row].val[mem_index])), "h"(store)
+                        : /* no clobbers */);
+            }
+
+            __threadfence();
+        }
+    }
+}
+
+__global__ void softmax(row_t *mem_rows, int num_rows)
+{
+    // This is the maximum number of threads that will issue requests for a
+    // group of banks that map to a unique PIM unit
+    int threads_per_pim_grp = NUM_THREADS_PER_WARP / \
+                              (NUM_BANKS / NUM_PIM_UNITS);
+
+    int thread_id = blockDim.x * blockIdx.x + threadIdx.x;
+    int thread_id_in_grp = thread_id % threads_per_pim_grp;
+
+    int chip = thread_id / NUM_THREADS_PER_WARP;
+    int bank = ((thread_id % NUM_THREADS_PER_WARP) / threads_per_pim_grp) * \
+               NUM_PIM_UNITS;
+
+    float dummy = 100;
+
+    for (int row = 0; row < num_rows; row++) {
+
+        for (int col = 0; col < NUM_COLS; col += (PIM_GRF_SIZE/2)) {
+            // reg[0] = e^a[i]
+            for (int i = thread_id_in_grp; i < (PIM_GRF_SIZE/2);
+                    i += threads_per_pim_grp) {
+                uint64_t mem_index = INDEX(chip, bank, col + i);
+
+                asm volatile ("st.cs.global.f32 [%0], %1;"
+                        : /* no outputs */
+                        : "l"(&(mem_rows[row].val[mem_index])), "f"(dummy)
+                        : /* no clobbers */);
+            }
+
+            __threadfence();
+
+            // reg[1] += reg[0]
+            for (int i = thread_id_in_grp; i < (PIM_GRF_SIZE/2);
+                    i += threads_per_pim_grp) {
+                uint64_t mem_index = INDEX(chip, bank, col + i);
+
+                asm volatile ("st.cs.global.f32 [%0], %1;"
+                        : /* no outputs */
+                        : "l"(&(mem_rows[row].val[mem_index])), "f"(dummy)
+                        : /* no clobbers */);
+            }
+
+            __threadfence();
+        }
+
+        __syncthreads();
+
+        if (thread_id_in_grp == 0) {
+            // Accumulate reg[1]
+            for (int col = 0; col < ((PIM_GRF_SIZE/2) - 1); col++) {
+                uint64_t mem_index = INDEX(chip, bank, col);
+
+                asm volatile ("st.cs.global.f32 [%0], %1;"
+                        : /* no outputs */
+                        : "l"(&(mem_rows[row].val[mem_index])), "f"(dummy)
+                        : /* no clobbers */);
+            }
+
+            __threadfence();
+
+            // Reduce reg[1] to a single value
+            asm volatile ("st.cs.global.f32 [%0], %1;"
+                    : /* no outputs */
+                    : "l"(&(mem_rows[row].val[INDEX(chip, bank, 0)])),
+                      "f"(dummy)
+                    : /* no clobbers */);
+
+            __threadfence();
+
+            // Store the reduced value in SRF
+            asm volatile ("st.cs.global.f32 [%0], %1;"
+                    : /* no outputs */
+                    : "l"(&(mem_rows[row].val[INDEX(chip, bank, 0)])),
+                      "f"(dummy)
+                    : /* no clobbers */);
+
+            __threadfence();
+        }
+
+        __syncthreads();
+
+        for (int col = 0; col < NUM_COLS; col += PIM_GRF_SIZE) {
+            // reg = a[i] / srf[0]
+            for (int i = thread_id_in_grp; i < (PIM_GRF_SIZE/2);
+                    i += threads_per_pim_grp) {
+                uint64_t mem_index = INDEX(chip, bank, col + i);
+
+                asm volatile ("st.cs.global.f32 [%0], %1;"
+                        : /* no outputs */
+                        : "l"(&(mem_rows[row].val[mem_index])), "f"(dummy)
+                        : /* no clobbers */);
+            }
+
+            __threadfence();
+
+            // a[i] = reg
+            for (int i = thread_id_in_grp; i < PIM_GRF_SIZE;
+                    i += threads_per_pim_grp) {
+                uint64_t mem_index = INDEX(chip, bank, col + i);
+
+                asm volatile ("st.cs.global.f32 [%0], %1;"
+                        : /* no outputs */
+                        : "l"(&(mem_rows[row].val[mem_index])), "f"(dummy)
                         : /* no clobbers */);
             }
 
