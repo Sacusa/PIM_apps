@@ -1,9 +1,0 @@
-if [ "$#" -ne 1  ]; then
-    echo "Usage: $0 <binary>"
-    exit -1
-fi
-
-BIN=$1
-
-./bin/${BIN} 10 20 32 1024 1024 100 none output.txt 1
-./clean.sh

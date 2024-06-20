@@ -1,9 +1,0 @@
-if [ "$#" -ne 1  ]; then
-    echo "Usage: $0 <binary>"
-    exit -1
-fi
-
-BIN=$1
-
-./bin/${BIN} filelist_4 -r 5 -lat 30 -lng 90
-./clean.sh
