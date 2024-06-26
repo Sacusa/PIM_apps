@@ -1,0 +1,3 @@
+[submodule "rodinia_3.1_pim"]
+	path = rodinia_3.1_pim
+	url = https://github.com/Sacusa/rodinia_3.1_pim
