@@ -2,7 +2,7 @@ BIN = main
 DEPS = ../common.o pim_real.o pim_stream.o
 
 CC=nvcc
-CCFLAGS=-ccbin g++ -m64 -lcudart --std=c++11 -O3 -gencode arch=compute_75,code=compute_75
+CCFLAGS=-ccbin g++ -m64 -lcudart --std=c++11 -O3 -gencode arch=compute_70,code=compute_70
 
 .SECONDARY: $(DEPS)
 
