@@ -10,7 +10,7 @@ fi
 pim_rf_size=$1
 outdir=output/pim_rf_size_${pim_rf_size}
 
-source /u/sgupta45/gpgpu-sim_distribution-4.0.1/setup_environment release
+source /opt/GPGPU-Sim-4.0.1/setup_environment release
 
 mkdir -p ${outdir}
 
