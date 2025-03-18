@@ -25,3 +25,5 @@ done
 ./main grim 1048576 32 > ${outdir}/grim_32_sm_8 &
 
 wait
+
+./clean.sh
