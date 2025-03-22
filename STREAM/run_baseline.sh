@@ -7,6 +7,10 @@ if [ "$#" -ne 1 ]; then
     exit -1
 fi
 
+# Set the policy to FR-FCFS (no CAP)
+sed -i '/gpgpu_dram_scheduler/c\-gpgpu_dram_scheduler 2' gpgpusim.config
+sed -i '/frfcfs_cap/c\-frfcfs_cap 0' gpgpusim.config
+
 pim_rf_size=$1
 outdir=output/pim_rf_size_${pim_rf_size}
 
