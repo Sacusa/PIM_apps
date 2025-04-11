@@ -53,7 +53,6 @@ enum pim_kernel_t {
     BN_FWD,
     BN_BWD,
     KMEANS,
-    HISTOGRAM,
     FULLY_CONNECTED,
     FULLY_CONNECTED_128_ELEM,
     GRIM,

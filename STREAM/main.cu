@@ -44,9 +44,6 @@ int main(int argc, char *argv[]) {
     else if (strcmp(kernel_name, "kmeans") == 0) {
         pim_kernel = KMEANS;
     }
-    else if (strcmp(kernel_name, "histogram") == 0) {
-        pim_kernel = HISTOGRAM;
-    }
     else if (strcmp(kernel_name, "fc") == 0) {
         pim_kernel = FULLY_CONNECTED;
     }

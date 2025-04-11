@@ -1,6 +1,5 @@
-#declare -a apps=("stream_add" "stream_copy" "stream_daxpy" "stream_scale"
-#    "stream_triad")
-declare -a apps=("stream_copy" "stream_daxpy" "stream_scale" "stream_triad")
+declare -a apps=("stream_add" "stream_copy" "stream_daxpy" "stream_scale"
+    "stream_triad" "bn_fwd" "bn_bwd" "fc" "kmeans" "grim")
 
 mkdir -p output
 

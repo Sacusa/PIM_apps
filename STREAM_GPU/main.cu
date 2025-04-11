@@ -189,25 +189,6 @@ int main(int argc, char *argv[]) {
         checkCudaError(cudaFree(cluster_size));
     }
 
-    else if (strcmp(kernel_name, "histogram") == 0) {
-        uint32_t *input, *local_bins, *bins;
-        int num_threads = blocksPerGrid * THREADS_PER_BLOCK;
-
-        checkCudaError(cudaMalloc((void **)&input,
-                    array_length * sizeof(uint32_t)));
-        checkCudaError(cudaMalloc((void **)&local_bins,
-                    blocksPerGrid * HISTOGRAM_NUM_BINS * sizeof(uint32_t)));
-        checkCudaError(cudaMalloc((void **)&bins,
-                    HISTOGRAM_NUM_BINS * sizeof(uint32_t)));
-
-        histogram<<<blocksPerGrid, THREADS_PER_BLOCK>>>(input, array_length,
-                local_bins, bins, num_threads, blocksPerGrid);
-
-        checkCudaError(cudaFree(input));
-        checkCudaError(cudaFree(local_bins));
-        checkCudaError(cudaFree(bins));
-    }
-
     else if (strcmp(kernel_name, "fc") == 0) {
         float *input, *weights, *output;
 

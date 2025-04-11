@@ -150,30 +150,6 @@ extern "C" pim_state_t *init_pim(pim_kernel_t pim_kernel, int array_length,
             break;
         }
 
-        case HISTOGRAM: {
-            int num_threads = NUM_CHIPS * 32;
-            num_rows = ((num_threads * HISTOGRAM_NUM_BINS * 4) / \
-                    row_factor) + 1;
-            pim_state->num_rows = num_rows;
-            pim_state->num_datapoints = array_size;
-
-            uint32_t *input, *bins;
-
-            checkCudaError(cudaMalloc((void **)&pim_state->rows,
-                        num_rows * sizeof(row_t)));
-            checkCudaError(cudaMalloc((void **)&input,
-                        array_length * sizeof(uint32_t)));
-            checkCudaError(cudaMalloc((void **)&bins,
-                        HISTOGRAM_NUM_BINS * sizeof(uint32_t)));
-
-            pim_state->num_args = 2;
-            pim_state->args = (void**) malloc(pim_state->num_args * \
-                    sizeof(void*));
-            pim_state->args[0] = input;
-            pim_state->args[1] = bins;
-            break;
-        }
-
         case FULLY_CONNECTED:
         case FULLY_CONNECTED_128_ELEM: {
             row_t *input;
@@ -265,12 +241,6 @@ extern "C" void launch_pim(pim_state_t *pim_state, cudaStream_t stream)
                     pim_state->num_datapoints, pim_state->num_features,
                     pim_state->num_iters, numThreads,
                     (row_t*) pim_state->args[2]);
-            break;
-        case HISTOGRAM:
-            histogram<<<blocksPerGrid, threadsPerBlock, 0, stream>>>(
-                    (uint32_t*) pim_state->args[0], pim_state->num_datapoints,
-                    pim_state->rows, pim_state->num_rows,
-                    (uint32_t*) pim_state->args[1], numThreads);
             break;
         case FULLY_CONNECTED:
             fully_connected<<<blocksPerGrid, threadsPerBlock, 0, stream>>>(
